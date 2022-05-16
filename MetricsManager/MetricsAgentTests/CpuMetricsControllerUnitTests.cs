@@ -1,41 +1,71 @@
 using MetricsAgent;
 using MetricsAgent.Controllers;
+using MetricsAgent.Models;
+using MetricsAgent.Models.Requests;
+using MetricsAgent.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace MetricsAgentTests
 {
     public class CpuMetricsControllerUnitTests
     {
-        private CpuMetricsAgentController controller;
+        private CpuMetricsAgentController _controller;
+        private Mock<ICpuMetricsRepository> mock;
+        private Mock<ILogger<CpuMetricsAgentController>> mockLogger;
 
         public CpuMetricsControllerUnitTests()
         {
-            controller = new CpuMetricsAgentController();
+            mock = new Mock<ICpuMetricsRepository>();
+            mockLogger = new Mock<ILogger<CpuMetricsAgentController>>();
+            _controller = new CpuMetricsAgentController(mockLogger.Object, mock.Object);
         }
 
         [Fact]
-        public void GetMetricsPercentile_ReturnsOk()
+        public void Create_ShouldCall_Create_From_Repository()
         {
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
-            var percentile = Percentile.P99;
 
-            var result = controller.GetMetrics(fromTime, toTime, percentile);
+            // Устанавливаем параметр заглушки
+            // В заглушке прописываем, что в репозиторий прилетит CpuMetric - объект
+            mock.Setup(repository =>
+            repository.Create(It.IsAny<CpuMetric>())).Verifiable();
+            // Выполняем действие на контроллере
+            var result = _controller.Create(new
+            CpuMetricCreateRequest
+            {
+                Time = TimeSpan.FromSeconds(1),
+                Value = 50
+            });
 
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+            // Проверяем заглушку на то, что пока работал контроллер
+            // Вызвался метод Create репозитория с нужным типом объекта в параметре
+            mock.Verify(repository => repository.Create(It.IsAny<CpuMetric>()),
+            Times.AtMostOnce());
+
         }
 
         [Fact]
-        public void GetMetrics_ReturnsOk()
+        public void GetAll_ShouldCall_GetAll_From_Repository()
         {
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
+            mock.Setup(repository => repository.GetAll()).Returns(new List<CpuMetric>());
+            var result = _controller.GetAll();
+            mock.Verify(repository => repository.GetAll());
 
-            var result = controller.GetMetrics(fromTime, toTime);
 
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+        }
+
+        [Fact]
+        public void GetMetrics_ShouldCall_GetMetrics_From_Repository()
+        {
+            var fromTime = new TimeSpan(00, 05, 00);
+            var toTime = new TimeSpan(00, 10, 00);
+            mock.Setup(repository => repository.GetByTimePeriod(fromTime, toTime)).Returns(new List<CpuMetric>());
+            var result = _controller.GetMetrics(fromTime, toTime);
+            mock.Verify(repository => repository.GetByTimePeriod(fromTime, toTime));
         }
     }
 }
