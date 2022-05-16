@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgent.Controllers
 {
@@ -11,11 +12,13 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class CpuMetricsAgentController : ControllerBase
     {
-        [HttpGet("from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
-        public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime, [FromRoute] Percentile percentile)
+        private readonly ILogger<CpuMetricsAgentController> _logger;
+        public CpuMetricsAgentController(ILogger<CpuMetricsAgentController> logger)
         {
-            return Ok();
+            _logger = logger;
+            _logger.LogDebug(1, "NLog встроен в CpuMetricsAgentController");
         }
+
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetrics( [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
