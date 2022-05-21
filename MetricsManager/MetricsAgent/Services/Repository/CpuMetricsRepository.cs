@@ -109,8 +109,8 @@ namespace MetricsAgent.Services
             connection.Open();
             using var cmd = new SQLiteCommand(connection);
             cmd.CommandText = "SELECT * FROM cpumetrics WHERE (time >= @from) and (time <= @to)";
-            cmd.Parameters.AddWithValue("@from", fromTime);
-            cmd.Parameters.AddWithValue("@to", toTime);
+            cmd.Parameters.AddWithValue("@from", fromTime.TotalSeconds);
+            cmd.Parameters.AddWithValue("@to", toTime.TotalSeconds);
             cmd.Prepare();
             var returnList = new List<CpuMetric>();
 
