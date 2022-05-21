@@ -1,4 +1,5 @@
-﻿using MetricsAgent.Services.Interfaces;
+﻿using Dapper;
+using MetricsAgent.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -13,126 +14,62 @@ namespace MetricsAgent.Services.Repository
         public void Create(DotNetMetric item)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-            // Создаём команду
-            using var cmd = new SQLiteCommand(connection);
-            // Прописываем в команду SQL-запрос на вставку данных
-            cmd.CommandText = "INSERT INTO dotnetmetrics(value, time) VALUES(@value, @time)";
-            // Добавляем параметры в запрос из нашего объекта
-            cmd.Parameters.AddWithValue("@value", item.Value);
-            // В таблице будем хранить время в секундах, поэтому преобразуем перед записью в секунды
-            // через свойство
-            cmd.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
-            // подготовка команды к выполнению
-            cmd.Prepare();
-            // Выполнение команды
-            cmd.ExecuteNonQuery();
+            connection.Execute("INSERT INTO  dotnetmetrics(value,time) VALUES(@value, @time)",
+                new
+                {
+                    value = item.Value,
+                    time = item.Time
+                });
         }
-        public void Update(DotNetMetric item)
-        {
-            using var connection = new SQLiteConnection(ConnectionString);
-            using var cmd = new SQLiteCommand(connection);
-            // Прописываем в команду SQL-запрос на обновление данных
-            cmd.CommandText = "UPDATE dotnetmetrics SET value = @value, time = @time WHERE id = @id; ";
-            cmd.Parameters.AddWithValue("@id", item.Id);
-            cmd.Parameters.AddWithValue("@value", item.Value);
-            cmd.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
-        }
-
         public void Delete(int id)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-            using var cmd = new SQLiteCommand(connection);
-            // Прописываем в команду SQL-запрос на удаление данных
-            cmd.CommandText = "DELETE FROM dotnetmetrics WHERE id=@id";
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            connection.Execute("DELETE FROM dotnetmetrics WHERE id=@id",
+            new
+            {
+                id = id
+            });
         }
+
+        public void Update(DotNetMetric item)
+        {
+            using var connection = new SQLiteConnection(ConnectionString);
+            connection.Execute("UPDATE dotnetmetrics SET value = @value, time = @time WHERE id = @id",
+                new
+                {
+                    value = item.Value,
+                    time = item.Time,
+                    id = item.Id
+                });
+        }
+
+
 
         public IList<DotNetMetric> GetAll()
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-            using var cmd = new SQLiteCommand(connection);
-            // Прописываем в команду SQL-запрос на получение всех данных из таблицы
-            cmd.CommandText = "SELECT * FROM dotnetmetrics";
-            var returnList = new List<DotNetMetric>();
-            using (SQLiteDataReader reader = cmd.ExecuteReader())
-            {
-                // Пока есть что читать — читаем
-                while (reader.Read())
-                {
-                    // Добавляем объект в список возврата
-                    returnList.Add(new DotNetMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        // Налету преобразуем прочитанные секунды в метку времени
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-                    });
-                }
-            }
-            return returnList;
+            IList<DotNetMetric> metrics = connection.Query<DotNetMetric>("SELECT Id, Time, Value FROM dotnetmetrics").ToList();
+            return metrics;
         }
 
         public DotNetMetric GetById(int id)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-            using var cmd = new SQLiteCommand(connection);
-            cmd.CommandText = "SELECT * FROM dotnetmetrics WHERE id=@id";
-            using (SQLiteDataReader reader = cmd.ExecuteReader())
-            {
-                // Если удалось что-то прочитать
-                if (reader.Read())
-                {
-                    // возвращаем прочитанное
-                    return new DotNetMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(1))
-                    };
-                }
-                else
-                {
-                    // Не нашлась запись по идентификатору, не делаем ничего
-                    return null;
-                }
-            }
+            DotNetMetric metric = connection.QuerySingle<DotNetMetric>("SELECT Id, Time, Value FROM dotnetmetrics",
+                new { id = id });
+            return metric;
         }
 
         public IList<DotNetMetric> GetByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-            using var cmd = new SQLiteCommand(connection);
-            cmd.CommandText = "SELECT * FROM dotnetmetrics WHERE (time >= @from) and (time <= @to)";
-            cmd.Parameters.AddWithValue("@from", fromTime);
-            cmd.Parameters.AddWithValue("@to", toTime);
-            cmd.Prepare();
-            var returnList = new List<DotNetMetric>();
-
-            using (SQLiteDataReader reader = cmd.ExecuteReader())
-            {
-                // Пока есть что читать — читаем
-                while (reader.Read())
+            List<DotNetMetric> metric = connection.Query<DotNetMetric>("SELECT * FROM dotnetmetrics WHERE (time >= @from) and (time <= @to)",
+                new
                 {
-                    // Добавляем объект в список возврата
-                    returnList.Add(new DotNetMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        // Налету преобразуем прочитанные секунды в меткувремени
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(1))
-                    });
-                }
-            }
-            return returnList;
+                    fromTime = fromTime.TotalSeconds,
+                    toTime = toTime.TotalSeconds
+                }).ToList();
+            return metric;
         }
     }
 }

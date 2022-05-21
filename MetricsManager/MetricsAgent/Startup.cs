@@ -41,6 +41,7 @@ namespace MetricsAgent
                 .AddJsonOptions(options =>
                     options.JsonSerializerOptions.Converters.Add(new CustomTimeSpanConverter()));
             ConfigureSqlLiteConnection(services);
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

@@ -32,7 +32,7 @@ namespace MetricsAgent.Controllers
         {
             CpuMetric cpuMetric = new CpuMetric
             {
-                Time = request.Time,
+                Time = request.Time.TotalSeconds,
                 Value = request.Value
             };
 
@@ -56,7 +56,7 @@ namespace MetricsAgent.Controllers
             {
                 response.Metrics.Add(new CpuMetricDto
                 {
-                    Time = metric.Time,
+                    Time = TimeSpan.FromSeconds( metric.Time),
                     Value = metric.Value,
                     Id = metric.Id
                 });
@@ -80,7 +80,7 @@ namespace MetricsAgent.Controllers
             {
                 response.Metrics.Add(new CpuMetricDto
                 {
-                    Time = metric.Time,
+                    Time = TimeSpan.FromSeconds(metric.Time),
                     Value = metric.Value,
                     Id = metric.Id
                 });
