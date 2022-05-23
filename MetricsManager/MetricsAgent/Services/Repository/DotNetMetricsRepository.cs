@@ -63,7 +63,7 @@ namespace MetricsAgent.Services.Repository
         public IList<DotNetMetric> GetByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            List<DotNetMetric> metric = connection.Query<DotNetMetric>("SELECT * FROM dotnetmetrics WHERE (time >= @from) and (time <= @to)",
+            List<DotNetMetric> metric = connection.Query<DotNetMetric>("SELECT * FROM dotnetmetrics WHERE (time >= @fromTime) and (time <= @toTime)",
                 new
                 {
                     fromTime = fromTime.TotalSeconds,

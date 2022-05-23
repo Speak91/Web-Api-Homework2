@@ -63,7 +63,7 @@ namespace MetricsAgent.Services.Repository
         public IList<RamMetric> GetByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            List<RamMetric> metric = connection.Query<RamMetric>("SELECT * FROM rammetrics WHERE (time >= @from) and (time <= @to)",
+            List<RamMetric> metric = connection.Query<RamMetric>("SELECT * FROM rammetrics WHERE (time >= @fromTime) and (time <= @toTime)",
                 new
                 {
                     fromTime = fromTime.TotalSeconds,

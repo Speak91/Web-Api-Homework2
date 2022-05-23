@@ -63,7 +63,7 @@ namespace MetricsAgent.Services.Repository
         public IList<HddMetric> GetByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            List<HddMetric> metric = connection.Query<HddMetric>("SELECT * FROM hddmetrics WHERE (time >= @from) and (time <= @to)",
+            List<HddMetric> metric = connection.Query<HddMetric>("SELECT * FROM hddmetrics WHERE (time >= @fromTime) and (time <= @toTime)",
                 new
                 {
                     fromTime = fromTime.TotalSeconds,

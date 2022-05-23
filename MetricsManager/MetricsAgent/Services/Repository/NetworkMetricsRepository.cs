@@ -62,7 +62,7 @@ namespace MetricsAgent.Services.Repository
         public IList<NetworkMetric> GetByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            List<NetworkMetric> metric = connection.Query<NetworkMetric>("SELECT * FROM networkmetrics WHERE (time >= @from) and (time <= @to)",
+            List<NetworkMetric> metric = connection.Query<NetworkMetric>("SELECT * FROM networkmetrics WHERE (time >= @fromTime) and (time <= @toTime)",
                 new
                 {
                     fromTime = fromTime.TotalSeconds,

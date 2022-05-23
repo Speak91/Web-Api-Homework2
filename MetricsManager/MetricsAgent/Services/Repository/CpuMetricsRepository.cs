@@ -58,7 +58,7 @@ namespace MetricsAgent.Services
         public IList<CpuMetric> GetByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
         {
             using var connection = new SQLiteConnection(ConnectionString);
-            List<CpuMetric> metric = connection.Query<CpuMetric>("SELECT * FROM cpumetrics WHERE (time >= @from) and (time <= @to)",
+            List<CpuMetric> metric = connection.Query<CpuMetric>("SELECT * FROM cpumetrics WHERE (time >= @fromTime) and (time <= @toTime)",
                 new
                 {
                     fromTime = fromTime.TotalSeconds,
