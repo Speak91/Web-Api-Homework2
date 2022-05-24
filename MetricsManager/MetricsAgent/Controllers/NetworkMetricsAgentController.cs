@@ -29,17 +29,6 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в NetworkMetricsAgentController");
         }
 
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] NetworkMetricCreateRequest request)
-        {
-            _networkMetricsRepository.Create(_mapper.Map<NetworkMetric>(request));
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую метрику сети: {0}", request);
-
-            return Ok();
-        }
-
         [HttpGet("all")]
         public IActionResult GetAll()
         {

@@ -1,5 +1,6 @@
-using AutoMapper;
+Ôªøusing AutoMapper;
 using FluentMigrator.Runner;
+using MetricsAgent.Jobs;
 using MetricsAgent.Services;
 using MetricsAgent.Services.Interfaces;
 using MetricsAgent.Services.Repository;
@@ -13,6 +14,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -44,11 +48,28 @@ namespace MetricsAgent
             var mapper = mapperConfiguration.CreateMapper();
             services.AddSingleton(mapper);
 
-            services.AddScoped<ICpuMetricsRepository, CpuMetricsRepository>();
-            services.AddScoped<IDotNetMetricsRepository, DotNetMetricsRepository>();
-            services.AddScoped<IHddMetricsRepository, HddMetricsRepository>();
-            services.AddScoped<INetworkMetricsRepository, NetworkMetricsRepository>();
-            services.AddScoped<IRamMetricsRepository, RamMetricsRepository>();
+            services.AddSingleton<IJobFactory, SingletonJobFactory>();
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+            services.AddHostedService<QuartzHostedService>();
+
+            services.AddSingleton<CpuMetricJob>();
+            services.AddSingleton<RamMetricJob>();
+            services.AddSingleton<HddMetricJob>();
+            services.AddSingleton<NetworkMetricJob>();
+            services.AddSingleton<DotnetMetricJob>();
+
+            services.AddSingleton(new JobSchedule(typeof(CpuMetricJob), "0/5 * * ? * * *"));
+            services.AddSingleton(new JobSchedule(typeof(RamMetricJob), "0/5 * * ? * * *"));
+            services.AddSingleton(new JobSchedule(typeof(HddMetricJob), "0/5 * * ? * * *"));
+            services.AddSingleton(new JobSchedule(typeof(NetworkMetricJob), "0/5 * * ? * * *"));
+            services.AddSingleton(new JobSchedule(typeof(DotnetMetricJob), "0/5 * * ? * * *"));
+            services.AddHostedService<QuartzHostedService>();
+
+            services.AddSingleton<ICpuMetricsRepository, CpuMetricsRepository>();
+            services.AddSingleton<IDotNetMetricsRepository, DotNetMetricsRepository>();
+            services.AddSingleton<IHddMetricsRepository, HddMetricsRepository>();
+            services.AddSingleton<INetworkMetricsRepository, NetworkMetricsRepository>();
+            services.AddSingleton<IRamMetricsRepository, RamMetricsRepository>();
 
             services.AddControllers()
                 .AddJsonOptions(options =>
@@ -59,7 +80,7 @@ namespace MetricsAgent
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MetricsAgent", Version = "v1" });
                
-                // œÓ‰‰ÂÊÍ‡ TimeSpan
+                // –ü–æ–¥–¥–µ—Ä–∂–∫–∞ TimeSpan
                 c.MapType<TimeSpan>(() => new OpenApiSchema
                 {
                     Type = "string",

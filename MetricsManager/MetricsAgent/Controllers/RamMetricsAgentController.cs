@@ -29,17 +29,6 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в RamMetricsAgentController");
         }
 
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] RamMetricCreateRequest request)
-        {
-            _ramMetricsRepository.Create(_mapper.Map<RamMetric>(request));
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую метрику оперативной памяти: {0}", request);
-
-            return Ok();
-        }
-
         [HttpGet("available")]
         public IActionResult GetAvailable()
         {

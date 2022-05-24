@@ -30,18 +30,6 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в CpuMetricsAgentController");
         }
 
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] CpuMetricCreateRequest request)
-        {
-
-            _cpuMetricsRepository.Create(_mapper.Map<CpuMetric>(request));
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", request);
-
-            return Ok();
-        }
-
         [HttpGet("all")]
         public IActionResult GetAll()
         {

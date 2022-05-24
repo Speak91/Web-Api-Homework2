@@ -29,17 +29,6 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в HddMetricsAgentController");
         }
 
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] HddMetricCreateRequest request)
-        {
-            _hddMetricsRepository.Create(_mapper.Map<HddMetric>(request));
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую Hdd метрику: {0}", request);
-
-            return Ok();
-        }
-
         [HttpGet("left")]
         public IActionResult GetFreeHDDSpace()
         {
