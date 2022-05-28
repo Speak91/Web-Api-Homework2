@@ -1,8 +1,10 @@
 ﻿using MetricsManager.Controllers;
+using MetricsManager.Services.Impl;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using System.Net.Http;
 using Xunit;
 
 namespace MetricsManagerTests
@@ -11,10 +13,12 @@ namespace MetricsManagerTests
     {
         private NetworkMetricsController controller;
         private Mock<ILogger<NetworkMetricsController>> mockLogger;
+        private Mock<INetworkMetricsAgentClient> _mock;
+        private Mock<IHttpClientFactory> _mockHttp;
         public NetworkMetricsControllerUnitTests()
         {
             mockLogger = new Mock<ILogger<NetworkMetricsController>>();
-            controller = new NetworkMetricsController(mockLogger.Object);
+            controller = new NetworkMetricsController(mockLogger.Object, _mock.Object, _mockHttp.Object);
         }
 
         [Fact]

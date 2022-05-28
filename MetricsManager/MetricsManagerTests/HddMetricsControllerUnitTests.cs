@@ -1,8 +1,10 @@
 ﻿using MetricsManager.Controllers;
+using MetricsManager.Services.Impl;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using System.Net.Http;
 using Xunit;
 
 namespace MetricsManagerTests
@@ -11,10 +13,13 @@ namespace MetricsManagerTests
     {
         private HddMetricsController controller;
         private Mock<ILogger<HddMetricsController>> mockLogger;
+        private Mock<IHddMetricsAgentClient> _mock;
+        private Mock<IHttpClientFactory> _mockHttp;
+
         public HddMetricsControllerUnitTests()
         {
             mockLogger = new Mock<ILogger<HddMetricsController>>();
-            controller = new HddMetricsController(mockLogger.Object);
+            controller = new HddMetricsController(mockLogger.Object, _mock.Object, _mockHttp.Object);
         }
 
         [Fact]
@@ -22,7 +27,7 @@ namespace MetricsManagerTests
         {
             var agentId = 1;
 
-            var result = controller.GetFreeHDDSpaceFromAgent(agentId);
+            var result = controller.GetFreeHDDSpaceFromAgent(agentId, new TimeSpan(1, 12, 13), new TimeSpan(2, 12, 13));
 
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
@@ -30,7 +35,7 @@ namespace MetricsManagerTests
         [Fact]
         public void GetFreeHDDSpaceFromAllCluster_ReturnsOk()
         {
-            var result = controller.GetFreeHDDSpaceFromAllCluster();
+            var result = controller.GetFreeHDDSpaceFromAllCluster(new TimeSpan(1, 12,13), new TimeSpan(2, 12, 13));
 
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }

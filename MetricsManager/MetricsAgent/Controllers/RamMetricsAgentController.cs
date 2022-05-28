@@ -46,5 +46,24 @@ namespace MetricsAgent.Controllers
                 _logger.LogDebug("Успешно показали все метрики оперативной памяти");
             return Ok(response);
         }
+
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        {
+            var metrics = _ramMetricsRepository.GetByTimePeriod(fromTime, toTime);
+            var response = new AllRamMetricsResponse()
+            {
+                Metrics = new List<RamMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
+            }
+
+            if (_logger != null)
+                _logger.LogDebug("Успешно показали все метрики cpu метрику за определенный период");
+            return Ok(response);
+        }
     }
 }

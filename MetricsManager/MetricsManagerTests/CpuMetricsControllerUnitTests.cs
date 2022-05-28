@@ -1,8 +1,11 @@
 using MetricsManager.Controllers;
+using MetricsManager.Services.Impl;
+using MetricsManager.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using System.Net.Http;
 using Xunit;
 
 
@@ -12,11 +15,12 @@ namespace MetricsManagerTests
     {
         private Mock<ILogger<CpuMetricsController>> mockLogger;
         private CpuMetricsController controller;
-
+        private Mock<ICpuMetricsAgentClient> _mock;
+        private Mock<IHttpClientFactory> _mockHttp;
         public CpuMetricsControllerUnitTests()
         {
             mockLogger = new Mock<ILogger<CpuMetricsController>>();
-            controller = new CpuMetricsController(mockLogger.Object);
+            controller = new CpuMetricsController(mockLogger.Object, _mock.Object, _mockHttp.Object);
         }
 
         [Fact]

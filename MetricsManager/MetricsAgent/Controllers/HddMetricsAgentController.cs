@@ -46,5 +46,24 @@ namespace MetricsAgent.Controllers
                 _logger.LogDebug("Успешно показали все hdd метрику");
             return Ok(response);
         }
+
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        {
+            var metrics = _hddMetricsRepository.GetByTimePeriod(fromTime, toTime);
+            var response = new AllHddMetricsResponse()
+            {
+                Metrics = new List<HddMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(_mapper.Map<HddMetricDto>(metric));
+            }
+
+            if (_logger != null)
+                _logger.LogDebug("Успешно показали все метрики cpu метрику за определенный период");
+            return Ok(response);
+        }
     }
 }
