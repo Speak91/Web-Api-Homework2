@@ -7,6 +7,7 @@ using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace MetricsAgent.Controllers
 {
     [Route("api/metrics/ram")]
     [ApiController]
+    [SwaggerTag("Агент метрик оперативной памяти")]
     public class RamMetricsAgentController : ControllerBase
     {
         private IRamMetricsRepository _ramMetricsRepository;
@@ -29,6 +31,12 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в RamMetricsAgentController");
         }
 
+        /// <summary>
+        /// Сбор метрик оперативной памяти
+        /// </summary>
+        /// <returns></returns>
+        [SwaggerOperation(description: "Сбор метрик оперативной памяти")]
+        [SwaggerResponse(200, "успешная операция")]
         [HttpGet("available")]
         public IActionResult GetAvailable()
         {
@@ -47,6 +55,14 @@ namespace MetricsAgent.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Сбор метрик оперативной памяти за определенный промежуток времени
+        /// </summary>
+        /// <param name="fromTime">Начальное время</param>
+        /// <param name="toTime">Конечное время</param>
+        /// <returns></returns>
+        [SwaggerOperation(description: "Сбор метрик оперативной памяти за определенный промежуток времени")]
+        [SwaggerResponse(200, "успешная операция")]
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {

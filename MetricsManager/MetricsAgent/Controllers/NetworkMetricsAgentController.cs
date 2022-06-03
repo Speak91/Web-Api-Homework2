@@ -7,6 +7,7 @@ using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace MetricsAgent.Controllers
 {
     [Route("api/metrics/network")]
     [ApiController]
+    [SwaggerTag("Агент метрик сети")]
     public class NetworkMetricsAgentController : ControllerBase
     {
         private INetworkMetricsRepository _networkMetricsRepository;
@@ -29,6 +31,12 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в NetworkMetricsAgentController");
         }
 
+        /// <summary>
+        /// Сбор метрик сети
+        /// </summary>
+        /// <returns></returns>
+        [SwaggerOperation(description: "Сбор метрик сети")]
+        [SwaggerResponse(200, "успешная операция")]
         [HttpGet("all")]
         public IActionResult GetAll()
         {
@@ -47,6 +55,14 @@ namespace MetricsAgent.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Сбор метрик cети за определенный промежуток времени
+        /// </summary>
+        /// <param name="fromTime">Начальное время</param>
+        /// <param name="toTime">Конечное время</param>
+        /// <returns></returns>
+        [SwaggerOperation(description: "Сбор метрик cети за определенный промежуток времени")]
+        [SwaggerResponse(200, "успешная операция")]
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {

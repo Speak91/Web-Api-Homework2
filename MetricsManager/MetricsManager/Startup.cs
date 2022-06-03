@@ -19,7 +19,9 @@ using Microsoft.OpenApi.Models;
 using Polly;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace MetricsManager
@@ -108,8 +110,28 @@ namespace MetricsManager
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MetricsManager", Version = "v1" });
-                
+                c.SwaggerDoc("v1", new OpenApiInfo { 
+                    Title = "MetricsManager", 
+                    Version = "v1",
+                    Description = "Здесь можно посмотреть Api нашего сервиса",
+                    TermsOfService = new Uri("https://example.com"),
+                    Contact = new OpenApiContact()
+                    {
+                        Name = "Illarionov V.",
+                        Email = "mail@mail.ru",
+                        Url = new Uri("https://google.com")
+                    },
+                    License = new OpenApiLicense()
+                    {
+                        Name = "Указать под какой лицензией все опубликовано",
+                        Url = new Uri("http://example.com")
+                    }
+
+                });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+                c.EnableAnnotations();
                 // Поддержка TimeSpan
                 c.MapType<TimeSpan>(() => new OpenApiSchema
                 {

@@ -7,6 +7,7 @@ using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace MetricsAgent.Controllers
 {
     [Route("api/metrics/hdd")]
     [ApiController]
+    [SwaggerTag("Агент метрик локального диска")]
     public class HddMetricsAgentController : ControllerBase
     {
         private IHddMetricsRepository _hddMetricsRepository;
@@ -29,7 +31,13 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в HddMetricsAgentController");
         }
 
+        /// <summary>
+        /// Сбор метрик локального диска
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("left")]
+        [SwaggerOperation(description: "Сбор метрик локального диска")]
+        [SwaggerResponse(200, "успешная операция")]
         public IActionResult GetFreeHDDSpace()
         {
             var metrics = _hddMetricsRepository.GetAll();
@@ -47,6 +55,14 @@ namespace MetricsAgent.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Сбор метрик локального диска за определенный промежуток времени
+        /// </summary>
+        /// <param name="fromTime">Начальное время</param>
+        /// <param name="toTime">Конечное время</param>
+        /// <returns></returns>
+        [SwaggerOperation(description: "Сбор метрик локального диска за определенный промежуток времени")]
+        [SwaggerResponse(200, "успешная операция")]
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {

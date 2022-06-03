@@ -6,6 +6,7 @@ using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace MetricsAgent.Controllers
 {
     [Route("api/metrics/dotnet")]
     [ApiController]
+    [SwaggerTag("Агент метрик .NET")]
     public class DotNetMetricsAgentController : ControllerBase
     {
         private IDotNetMetricsRepository _dotNetMetricsRepository;
@@ -31,7 +33,13 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в DotNetMetricsAgentController");
         }
 
+        /// <summary>
+        /// Сбор метрик .NET
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("all")]
+        [SwaggerOperation(description: "Сбор метрик .NET")]
+        [SwaggerResponse(200, "успешная операция")]
         public IActionResult GetAll()
         {
             var metrics = _dotNetMetricsRepository.GetAll();
@@ -49,7 +57,16 @@ namespace MetricsAgent.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Сбор метрик .NET за определенный промежуток времени
+        /// </summary>
+        /// <param name="fromTime">Начальное время</param>
+        /// <param name="toTime">Конечное время</param>
+        /// <returns></returns>
+        [SwaggerOperation(description: "Сбор метрик .NET за определенный промежуток времени")]
+        [SwaggerResponse(200, "успешная операция")]
         [HttpGet("errors-count/from/{fromTime}/to/{toTime}")]
+
         public IActionResult GetErrorsCount([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
             var metrics = _dotNetMetricsRepository.GetByTimePeriod(fromTime, toTime);

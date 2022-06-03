@@ -9,11 +9,13 @@ using MetricsAgent.Services;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Models;
 using AutoMapper;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace MetricsAgent.Controllers
 {
     [Route("api/metrics/cpu")]
     [ApiController]
+    [SwaggerTag("Агент метрик процессора")]
     public class CpuMetricsAgentController : ControllerBase
     {
         private ICpuMetricsRepository _cpuMetricsRepository;
@@ -31,6 +33,8 @@ namespace MetricsAgent.Controllers
         }
 
         [HttpGet("all")]
+        [SwaggerOperation(description: "Сбор метрик процессора")]
+        [SwaggerResponse(200, "успешная операция")]
         public IActionResult GetAll()
         {
             var metrics = _cpuMetricsRepository.GetAll();
@@ -49,6 +53,8 @@ namespace MetricsAgent.Controllers
             return Ok(response);
         }
 
+        [SwaggerOperation(description: "Сбор метрик процессора за определенный промежуток времени")]
+        [SwaggerResponse(200, "успешная операция")]
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
