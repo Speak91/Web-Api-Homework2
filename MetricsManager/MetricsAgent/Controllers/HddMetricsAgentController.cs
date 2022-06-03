@@ -1,4 +1,5 @@
-﻿using MetricsAgent.Models;
+﻿using AutoMapper;
+using MetricsAgent.Models;
 using MetricsAgent.Models.DTO;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Models.Requests.Response;
@@ -19,8 +20,10 @@ namespace MetricsAgent.Controllers
     {
         private IHddMetricsRepository _hddMetricsRepository;
         private readonly ILogger<HddMetricsAgentController> _logger;
-        public HddMetricsAgentController(ILogger<HddMetricsAgentController> logger, IHddMetricsRepository hddMetricsRepository)
+        private readonly IMapper _mapper;
+        public HddMetricsAgentController(ILogger<HddMetricsAgentController> logger, IHddMetricsRepository hddMetricsRepository, IMapper mapper)
         {
+            _mapper = mapper;
             _hddMetricsRepository = hddMetricsRepository;
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в HddMetricsAgentController");
@@ -29,16 +32,10 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] HddMetricCreateRequest request)
         {
-            HddMetric hddMetric = new HddMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
-
-            _hddMetricsRepository.Create(hddMetric);
+            _hddMetricsRepository.Create(_mapper.Map<HddMetric>(request));
 
             if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую Hdd метрику: {0}", hddMetric);
+                _logger.LogDebug("Успешно добавили новую Hdd метрику: {0}", request);
 
             return Ok();
         }
@@ -53,12 +50,7 @@ namespace MetricsAgent.Controllers
             };
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new HddMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<HddMetricDto>(metric));
             }
 
             if (_logger != null)

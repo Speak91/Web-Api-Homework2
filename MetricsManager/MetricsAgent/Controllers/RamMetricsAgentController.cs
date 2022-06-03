@@ -1,4 +1,5 @@
-﻿using MetricsAgent.Models;
+﻿using AutoMapper;
+using MetricsAgent.Models;
 using MetricsAgent.Models.DTO;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Models.Requests.Response;
@@ -19,8 +20,10 @@ namespace MetricsAgent.Controllers
     {
         private IRamMetricsRepository _ramMetricsRepository;
         private readonly ILogger<RamMetricsAgentController> _logger;
-        public RamMetricsAgentController(ILogger<RamMetricsAgentController> logger, IRamMetricsRepository ramMetricsRepository)
+        private readonly IMapper _mapper;
+        public RamMetricsAgentController(ILogger<RamMetricsAgentController> logger, IRamMetricsRepository ramMetricsRepository, IMapper mapper)
         {
+            _mapper = mapper;
             _ramMetricsRepository = ramMetricsRepository;
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в RamMetricsAgentController");
@@ -29,16 +32,10 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] RamMetricCreateRequest request)
         {
-            RamMetric networkMetric = new RamMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
-
-            _ramMetricsRepository.Create(networkMetric);
+            _ramMetricsRepository.Create(_mapper.Map<RamMetric>(request));
 
             if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую метрику оперативной памяти: {0}", networkMetric);
+                _logger.LogDebug("Успешно добавили новую метрику оперативной памяти: {0}", request);
 
             return Ok();
         }
@@ -53,12 +50,7 @@ namespace MetricsAgent.Controllers
             };
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new RamMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
             }
 
             if (_logger != null)

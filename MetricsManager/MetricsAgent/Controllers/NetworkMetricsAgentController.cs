@@ -1,4 +1,5 @@
-﻿using MetricsAgent.Models;
+﻿using AutoMapper;
+using MetricsAgent.Models;
 using MetricsAgent.Models.DTO;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Models.Requests.Response;
@@ -19,9 +20,10 @@ namespace MetricsAgent.Controllers
     {
         private INetworkMetricsRepository _networkMetricsRepository;
         private readonly ILogger<NetworkMetricsAgentController> _logger;
-
-        public NetworkMetricsAgentController(ILogger<NetworkMetricsAgentController> logger, INetworkMetricsRepository networkMetricsRepository)
+        private readonly IMapper _mapper;
+        public NetworkMetricsAgentController(ILogger<NetworkMetricsAgentController> logger, INetworkMetricsRepository networkMetricsRepository, IMapper mapper)
         {
+            _mapper = mapper;
             _networkMetricsRepository = networkMetricsRepository;
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в NetworkMetricsAgentController");
@@ -30,16 +32,10 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] NetworkMetricCreateRequest request)
         {
-            NetworkMetric networkMetric = new NetworkMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
-
-            _networkMetricsRepository.Create(networkMetric);
+            _networkMetricsRepository.Create(_mapper.Map<NetworkMetric>(request));
 
             if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую метрику сети: {0}", networkMetric);
+                _logger.LogDebug("Успешно добавили новую метрику сети: {0}", request);
 
             return Ok();
         }
@@ -54,12 +50,7 @@ namespace MetricsAgent.Controllers
             };
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new NetworkMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
             }
 
             if (_logger != null)
@@ -77,12 +68,7 @@ namespace MetricsAgent.Controllers
             };
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new NetworkMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
             }
 
             if (_logger != null)

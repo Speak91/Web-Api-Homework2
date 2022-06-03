@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using MetricsAgent.Services;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Models;
+using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -17,11 +18,13 @@ namespace MetricsAgent.Controllers
     {
         private ICpuMetricsRepository _cpuMetricsRepository;
         private readonly ILogger<CpuMetricsAgentController> _logger;
-
+        private readonly IMapper _mapper;
         public CpuMetricsAgentController(
             ILogger<CpuMetricsAgentController> logger, 
-            ICpuMetricsRepository cpuMetricsRepository)
+            ICpuMetricsRepository cpuMetricsRepository, 
+            IMapper mapper)
         {
+            _mapper = mapper;
             _cpuMetricsRepository = cpuMetricsRepository;
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в CpuMetricsAgentController");
@@ -30,16 +33,11 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] CpuMetricCreateRequest request)
         {
-            CpuMetric cpuMetric = new CpuMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
 
-            _cpuMetricsRepository.Create(cpuMetric);
+            _cpuMetricsRepository.Create(_mapper.Map<CpuMetric>(request));
 
             if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
+                _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", request);
 
             return Ok();
         }
@@ -52,14 +50,10 @@ namespace MetricsAgent.Controllers
             {
                 Metrics = new List<CpuMetricDto>()
             };
+
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new CpuMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<CpuMetricDto>(metric));
             }
 
             if (_logger != null)
@@ -78,17 +72,12 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new CpuMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<CpuMetricDto>(metric));
             }
 
             if (_logger != null)
                 _logger.LogDebug("Успешно показали все метрики cpu метрику за определенный период");
-            return Ok();
+            return Ok(response);
         }
     }
 }

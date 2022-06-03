@@ -1,4 +1,5 @@
-﻿using MetricsAgent.Models;
+﻿using AutoMapper;
+using MetricsAgent.Models;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Services;
 using MetricsAgent.Services.Interfaces;
@@ -18,11 +19,13 @@ namespace MetricsAgent.Controllers
     {
         private IDotNetMetricsRepository _dotNetMetricsRepository;
         private readonly ILogger<DotNetMetricsAgentController> _logger;
-        
+        private readonly IMapper _mapper;
         public DotNetMetricsAgentController(
             ILogger<DotNetMetricsAgentController> logger,
-            IDotNetMetricsRepository dotNetMetricsRepository)
+            IDotNetMetricsRepository dotNetMetricsRepository,
+            IMapper mapper)
         {
+            _mapper = mapper;
             _dotNetMetricsRepository = dotNetMetricsRepository;
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в DotNetMetricsAgentController");
@@ -31,16 +34,10 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] DotNetMetricCreateRequest request)
         {
-            DotNetMetric dotNetMetric = new DotNetMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
-
-            _dotNetMetricsRepository.Create(dotNetMetric);
+            _dotNetMetricsRepository.Create(_mapper.Map<DotNetMetric>(request));
 
             if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую dotNet метрику: {0}", dotNetMetric);
+                _logger.LogDebug("Успешно добавили новую dotNet метрику: {0}", request);
 
             return Ok();
         }
@@ -55,12 +52,7 @@ namespace MetricsAgent.Controllers
             };
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new DotNetMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<DotNetMetricDto>(metric));
             }
 
             if (_logger != null)
@@ -78,17 +70,12 @@ namespace MetricsAgent.Controllers
             };
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new DotNetMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<DotNetMetricDto>(metric));
             }
 
             if (_logger != null)
                 _logger.LogDebug("Успешно передали все метрики за определенный период");
-            return Ok();
+            return Ok(response);
         }
 
     }
