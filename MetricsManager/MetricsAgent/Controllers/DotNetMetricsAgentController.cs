@@ -31,17 +31,6 @@ namespace MetricsAgent.Controllers
             _logger.LogDebug(1, "NLog встроен в DotNetMetricsAgentController");
         }
 
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] DotNetMetricCreateRequest request)
-        {
-            _dotNetMetricsRepository.Create(_mapper.Map<DotNetMetric>(request));
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую dotNet метрику: {0}", request);
-
-            return Ok();
-        }
-
         [HttpGet("all")]
         public IActionResult GetAll()
         {
