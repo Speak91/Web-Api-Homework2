@@ -1,5 +1,7 @@
 ﻿using MetricsManager;
 using MetricsManager.Controllers;
+using MetricsManager.Models;
+using MetricsManager.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -12,18 +14,19 @@ namespace MetricsManagerTests
     {
         private AgentsController controller;
         private Mock<ILogger<AgentsController>> mockLogger;
+        private Mock<IAgentsRepository> mock;
         public AgentsControllerUnitTests()
         {
             mockLogger = new Mock<ILogger<AgentsController>>();
-            controller = new AgentsController(mockLogger.Object);
+            controller = new AgentsController(mockLogger.Object, mock.Object);
         }
 
         [Fact]
         public void RegisterAgent_ReturnsOk()
         {
-            var agentInfo = new AgentInfo();
+            var agentUrl = "fasfas";
 
-            var result = controller.RegisterAgent(agentInfo);
+            var result = controller.RegisterAgent(agentUrl);
 
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
@@ -51,7 +54,7 @@ namespace MetricsManagerTests
         [Fact]
         public void GetRegisterMetrics_ReturnsOk()
         {
-             var result = controller.GetRegisterMetrics();
+            var result = controller.EnableAgentById(4);
 
             Assert.Null(result);
         }

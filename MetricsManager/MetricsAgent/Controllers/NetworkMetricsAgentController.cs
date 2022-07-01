@@ -62,7 +62,7 @@ namespace MetricsAgent.Controllers
 
             if (_logger != null)
                 _logger.LogDebug("Успешно показали все метрики сети за определенный период");
-            return Ok();
+            return Ok(response);
         }
     }
 }
