@@ -1,7 +1,9 @@
 ﻿using MetricsManager.Models.Request;
 using MetricsManager.Services.Impl;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -10,6 +12,7 @@ namespace MetricsManager.Controllers
 {
     [Route("api/metrics/dotnet")]
     [ApiController]
+    [SwaggerTag("Менеджер метрик .NET")]
     public class DotNetMetricsController : ControllerBase
     {
         private readonly ILogger<DotNetMetricsController> _logger;
@@ -26,18 +29,29 @@ namespace MetricsManager.Controllers
             _logger.LogDebug(1, "NLog встроен в DotNetMetricsController");
         }
 
-        [HttpGet("errors-count/agent/{agentId}/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetErrorsCountFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        /// <summary>
+        /// "Метрики .NET определенного агента, за указанный период
+        /// </summary>
+        /// <returns></returns>
+        [SwaggerOperation(description: "Метрики .NET определенного агента, за указанный период")]
+        [SwaggerResponse(200, "успешная операция")]
+        [HttpGet("errors-countFromAgent")]
+        [ProducesResponseType(typeof(DotNetMetricsResponse), StatusCodes.Status200OK)]
+        public IActionResult GetErrorsCountFromAgent([FromBody] DotNetMetricsRequest request)
         {
-            DotNetMetricsResponse response = _metricsAgentClient.GetAllMetrics(new DotNetMetricsRequest()
-            {
-                AgentId = agentId,
-                FromTime = fromTime,
-                ToTime = toTime
-            });
-            _logger.LogInformation($"Список ошибок передан от {agentId}");
+            DotNetMetricsResponse response = _metricsAgentClient.GetAllMetrics(request);
+            _logger.LogInformation($"Список ошибок передан от {request.AgentId}");
             return Ok(response);
         }
+
+        /// <summary>
+        /// Метрики .NET от всех зарегистрированных агентов, за указанный период
+        /// </summary>
+        /// <param name="fromTime">начальная дата</param>
+        /// <param name="toTime">конечная дата</param>
+        /// <returns></returns>
+        [SwaggerOperation(description: "Метрики .NET от всех зарегистрированных агентов, за указанный период")]
+        [SwaggerResponse(200, "успешная операция")]
         [HttpGet("errors-count/cluster/from/{fromTime}/to/{toTime}")]
         public IActionResult GetErrorsCountFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
